@@ -1,10 +1,10 @@
 
-//����Ȩ����ͼ�Ĵ���, �����ڽӾ���ķ�ʽ�洢
+//无向图的创建, 利用邻接矩阵的方式存储
 #include<iostream>
 using namespace std;
 #include <assert.h>
 
-#define MAX_COST 0x7FFF		//�ٶ�ȨֵΪ����
+#define MAX_COST 0x7FFF		//假定权值为整型
 
 template<class V, class E>
 class CGraphMtx
@@ -31,7 +31,7 @@ public:
 			for (int j = 0; j < m_maxVtxSize; ++j)
 			{
 				if (i != j)
-					m_edge[i][j] = MAX_COST;//��ʼ��ʱ�����ֵ��ʼ������ʾ������֮��û�б�
+					m_edge[i][j] = MAX_COST;//初始化时用最大值初始化，表示两顶点之间没有边
 				else
 					m_edge[i][j] = E();
 			}
@@ -66,16 +66,16 @@ public:
 	bool insertVtx(const V& v);
 	bool insertEdge(const V& vfst, const V& vscd, const E& weight);
 
-	bool removeVtx(const V& v);						//ɾ������V�����������ı�
-	bool removeEdge(const V& vfst, const V& vscd);	//ɾ���ߣ�vfst, vscd��
+	bool removeVtx(const V& v);						//删除顶点V和它所关联的边
+	bool removeEdge(const V& vfst, const V& vscd);	//删除边（vfst, vscd）
 
-	int getFirstNeighbor(const V& v) const;				//ȡ����v�ĵ�һ���ڽӶ���
-	int getNextNeighbor(const V& v, const V& w) const;	//ȡ����v���ڽӶ���w����һ�ڽӶ���
+	int getFirstNeighbor(const V& v) const;				//取顶点v的第一个邻接顶点
+	int getNextNeighbor(const V& v, const V& w) const;	//取顶点v的邻接顶点w的下一邻接顶点
 
 	void showGraph();
 
 public:
-	//��С������������ķ�㷨ʵ�ֺ�������
+	//最小生成树的普理姆算法实现函数声明
 	bool MST_Prime(const V& vBegin);
 	E& getWeight(int v1, int v2) { return m_edge[v1][v2];}
 
@@ -109,7 +109,7 @@ bool CGraphMtx<V, E>::insertVtx(const V& v)
 	return true;
 }
 
-//����ߣ�weightΪȨֵ
+//插入边，weight为权值
 template<class V, class E>
 bool CGraphMtx<V, E>::insertEdge(const V& vfst, const V& vscd, const E& weight)
 {
@@ -135,17 +135,17 @@ bool CGraphMtx<V, E>::removeVtx(const V &v)
 	int num = 0;   
 	if (vIdx == -1) return false;
 
-	//��¼�뵱ǰ������صıߵ���Ŀ
+	//记录与当前顶点相关的边的数目
 	for (int i = 0; i < m_vtxSize; ++i)
 	{
 		if (m_edge[vIdx][i] != E())
 		{
 			++num;
-			m_edge[vIdx][i] = m_edge[i][vIdx] = MAX_COST; //ɾ����ö�����ص����б�
+			m_edge[vIdx][i] = m_edge[i][vIdx] = MAX_COST; //删除与该顶点相关的所有边
 		}
 	}
 
-	//���������һ�к����һ��ǰ�Ƹ���Ҫɾ�����к���
+	//将矩阵最后一行和最后一列前移覆盖要删除的行和列
 	if (v != m_vtxSize)
 	{
 		for (int i = 0; i < m_vtxSize; ++i)
@@ -162,7 +162,7 @@ bool CGraphMtx<V, E>::removeVtx(const V &v)
 	return true;
 }
 
-//ɾ���ߣ�vfst, vscd��
+//删除边（vfst, vscd）
 template<class V, class E>
 bool CGraphMtx<V, E>::removeEdge(const V& vfst, const V& vscd)
 {
@@ -180,7 +180,7 @@ bool CGraphMtx<V, E>::removeEdge(const V& vfst, const V& vscd)
 	return true;
 }
 
-//��ȡv�ĵ�һ���ڽӶ���
+//获取v的第一个邻接顶点
 template<class V, class E>
 int CGraphMtx<V, E>::getFirstNeighbor(const V& v) const
 {
@@ -197,7 +197,7 @@ int CGraphMtx<V, E>::getFirstNeighbor(const V& v) const
 	return -1;
 }
 
-//ȡ����v���ڽӶ���w����һ��v���ڽӶ���
+//取顶点v的邻接顶点w的下一个v的邻接顶点
 template<class V, class E>
 int CGraphMtx<V, E>::getNextNeighbor(const V& v, const V& w) const
 {
@@ -243,20 +243,20 @@ void CGraphMtx<V, E>::showGraph()
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 /*
-Prime�㷨������
-�������ݽṹ��
-		��С��ͬ�ڵ����һ����
-		lowCost[i]:��ʾ��iΪ�յ�ıߵ���СȨֵ,��lowCost[i]=0˵����iΪ�յ�ıߵ���СȨֵ=0,Ҳ���Ǳ�ʾi�������MST
-		mst[i]:��ʾ��Ӧlowcost[i]����㣬��˵����<mst[i],i>��MST��һ���ߣ���mst[i]=0��ʾ�����±�Ϊ0���յ�
-	���±�Ϊi��
-		��������ѡ��һ����ʼ�ڵ㣬��ʼ��lowCost[i]Ϊ��ʼ�ڵ㵽���������ڵ�ıߵ�Ȩֵ����������ڱ����ʼ��Ϊ�����MAX_COST��,
-	ͼ�������Ի����������ǽ��Ի���Ϊ0��
-		Ȼ������a.��lowCost���ҵ��뵱ǰ��ʼ�ڵ��Ȩֵ��С�ıߣ�b.��ñ�����Ӧ����һ�ڵ���Ϊ��ʼ�ڵ㣬����lowCost��mst[i],
-	���µ�ʱ������Ǳȵ�ǰȨֵС��ʱ��Ÿ���,�����ܱ�֤����С���ظ�ִ����������a��b����ִ��n-1��(nΪ�������)����Ϊ��n���ڵ㣬
-	������С�������϶���n-1���ߡ�
+Prime算法描述：
+两个数据结构：
+		大小均同节点个数一样大
+		lowCost[i]:表示以i为终点的边的最小权值,当lowCost[i]=0说明以i为终点的边的最小权值=0,也就是表示i点加入了MST
+		mst[i]:表示对应lowcost[i]的起点，即说明边<mst[i],i>是MST的一条边，当mst[i]=0表示起点的下标为0而终点
+	的下标为i。
+		首先我们选定一个开始节点，初始化lowCost[i]为开始节点到其他各个节点的边的权值，如果不存在边则初始化为无穷大（MAX_COST）,
+	图不存在自环，所以我们将自环设为0。
+		然后我们a.在lowCost中找到与当前开始节点间权值最小的边，b.令该边所对应的另一节点作为开始节点，更新lowCost和mst[i],
+	更新的时候必须是比当前权值小的时候才更新,否则不能保证是最小。重复执行上述步骤a、b，共执行n-1次(n为顶点个数)，因为有n个节点，
+	它的最小生成树肯定有n-1条边。
 */
 template<class V, class E>
-bool CGraphMtx<V, E>::MST_Prime(const V &vBegin/*��ʼ�ڵ�*/)
+bool CGraphMtx<V, E>::MST_Prime(const V &vBegin/*开始节点*/)
 {
 	int n = numberOfVtx();
 	E *lowCost = new E[n];
@@ -276,8 +276,8 @@ bool CGraphMtx<V, E>::MST_Prime(const V &vBegin/*��ʼ�ڵ�*/)
 			lowCost[i] = 0;
 	}
 
-	int low = MAX_COST;  //��vf��������ڽӽڵ����С���ѣ���Ȩֵ��
-	int lowIdx = -1;	 //�����С���Ѷ�Ӧ�Ľڵ���±�
+	int low = MAX_COST;  //从vf到其各个邻接节点的最小花费（即权值）
+	int lowIdx = -1;	 //与该最小花费对应的节点的下标
 	for (int i = 0; i < n - 1; ++i)
 	{
 		low = MAX_COST;
@@ -312,13 +312,13 @@ bool CGraphMtx<V, E>::MST_Prime(const V &vBegin/*��ʼ�ڵ�*/)
 
 
 /*
-kruskal(��³˹����)�㷨��
-	�������Ӹ����ṹ��Edge����¼��ǰ�ߵ���㣬�յ��Ȩֵ��Ȼ�����߽ṹ�����¼��ǰͼ�����бߵ���Ϣ��
-Ȼ������б߰�Ȩֵ���򣬷��㽨����С��������������С������ʱ�����Ǵ���С�ı߿�ʼȡ��ÿ��ȡ������ʱ����Ҫ�ж�
-�ñߵ�ǰ��ڵ��Ƿ�����ͬһ�������������ͬһ���������Ӿͻ����ɻ�·�����ԣ����Ǿͺ��Ըøñߣ�ȡ��һ���ߣ����
-����ͬһ��ͨ������������mark_Same������������������ʹ�䴦��ͬһ��ͨ������ע������������˵����ͨ��ͨ��
-father����ʵ�ֵģ����޸�father[i]�ı�i�ڸ���ͨ�����еĵ���һ���ڽӶ��㣬������ֱ������ȡ�����һ�����һ��
-�ߣ���ʱ�õ�����ͨ�������Ǹ�ͼ����С��������
+kruskal(克鲁斯卡尔)算法：
+	我们添加辅助结构类Edge，记录当前边的起点，终点和权值，然后建立边结构数组记录当前图中所有边的信息，
+然后给所有边按权值排序，方便建立最小生成树。建立最小生成树时，我们从最小的边开始取，每次取出来的时候需要判断
+该边的前后节点是否属于同一分量，如果属于同一分量，连接就会生成回路，所以，我们就忽略该该边，取下一条边，如果
+不在同一连通分量，则利用mark_Same函数将其连接起来，使其处于同一连通分量，注意我们在这所说的连通是通过
+father数组实现的，即修改father[i]改编i在该连通分量中的的上一个邻接顶点，就这样直至我们取出最后一条最后一条
+边，此时得到的连通分量就是该图的最小生成树。
 */
 
 template<class E>
@@ -336,14 +336,14 @@ public:
 	E cost;
 };
 
-//�жϱ�Ȩֵ�Ĵ�С����������
+//判断边权值的大小，方便排序
 template<class E>
 int Edge<E>::compare(const void *a, const void *b)
 {
 	return (*(Edge<E>*)a).cost - (*(Edge<E>*)b).cost;
 }
 
-//�жϵ�ǰ�ڵ�ͼ������������Ľڵ��Ƿ�����ͬһ��ͨ����
+//判断当前节点和即将与它相连的节点是否属于同一连通分量
 template <class E>
 bool Edge<E>::is_Same(int *ft)
 {
@@ -358,7 +358,7 @@ bool Edge<E>::is_Same(int *ft)
 	return i == j;
 }
 
-//���ӵ�ǰ���㣬ʹ����������Ľڵ㴦��ͬһ��ͨ����
+//连接当前顶点，使其和它相连的节点处于同一连通分量
 template <class E>
 void Edge<E>::mark_Same(int *ft)
 {
@@ -382,7 +382,7 @@ bool CGraphMtx<V, E>::MST_Kruskal()
 	Edge<E> *edge = (Edge<E> *)malloc(sizeof(Edge<E>)*size);
 	if (edge == NULL)	return false;
 
-	//��¼���бߵ���Ϣ
+	//记录所有边的信息
 	int k = 0; 
 	for (int i = 0; i < n; ++i)
 	{
@@ -398,14 +398,14 @@ bool CGraphMtx<V, E>::MST_Kruskal()
 		}	 //for i
 	} //for i
 
-	//���մ�С��������
+	//按照从小到大排序
  	qsort(edge,k, sizeof(Edge<E>), Edge<E>::compare);
 
 	int *father = new int[n];
 	if (father == NULL) return false;
 
 	for (int i = 0; i < n; ++i)
-		father[i] = i;     //��ʼʱÿ�����㶼�Ƕ����ģ����ڵ㶼������
+		father[i] = i;     //初始时每个顶点都是独立的，父节点都是自身
 
 	int vbegin, vend;
 	for (int i = 0; i < size; ++i)
