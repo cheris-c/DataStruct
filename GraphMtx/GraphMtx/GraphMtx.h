@@ -1,5 +1,5 @@
 
-//无向图的创建, 利用邻接矩阵的方式存储
+//不带权无向图的创建, 利用邻接矩阵的方式存储
 #include<iostream>
 using namespace std;
 
