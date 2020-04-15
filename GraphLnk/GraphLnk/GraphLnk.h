@@ -1,6 +1,6 @@
 #pragma once
 
-//无向图的创建 存储方式：邻接表
+//无向图的创建 存储方式：邻接矩阵
 #include <iostream>
 using namespace std;
 

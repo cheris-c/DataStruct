@@ -10,7 +10,7 @@ ostream& operator<<(ostream &out, const BigInt &bt)
 		out<<(int)bt[i];
 	}
 	return out;
-}
+}																																					   
 
 char* BigInt::toString()  const
 {

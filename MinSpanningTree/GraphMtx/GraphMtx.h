@@ -1,5 +1,5 @@
 
-//无向图的创建, 利用邻接矩阵的方式存储
+//不带权无向图的创建, 利用邻接矩阵的方式存储
 #include<iostream>
 using namespace std;
 #include <assert.h>
@@ -79,6 +79,7 @@ public:
 	bool MST_Prime(const V& vBegin);
 	E& getWeight(int v1, int v2) { return m_edge[v1][v2];}
 
+	//克鲁斯卡尔算法
 	bool MST_Kruskal();
 	static int compare(const void *a, const void *b);
 

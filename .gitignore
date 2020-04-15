@@ -41,6 +41,14 @@
 *.ncb
 *.dsw
 *.dsp
+*.tlog
+*.pdb
+*.idb
+*.ilk
+*.opt
+*.vcxproj.filters
+*.log
+*.vcxproj.filters
 
 *.code-workspace
 *.out
