@@ -18,6 +18,7 @@ long Fib(int n)
 }
 */
 
+//! 时间复杂度 O(2^n)
 long Fib(int n)
 {
 	if (0 == n)

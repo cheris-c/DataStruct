@@ -5,6 +5,7 @@
 */
 
 #include<iostream>
+#include <stdlib.h>
 using namespace std;
 
 #define P 7
@@ -118,6 +119,5 @@ int main()
 		cout << endl;
 	} //for
 
-	system("pause");
 	return 0;
 }

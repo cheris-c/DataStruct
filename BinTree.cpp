@@ -5,6 +5,7 @@
 */
 #include <assert.h>
 #include <iostream>
+#include <stdlib.h>
 #include <queue>
 
 using namespace std;
